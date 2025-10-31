@@ -111,16 +111,13 @@
     const qrContainer = document.getElementById("qrcode");
     const noteEl = document.getElementById("note");
 
-    // ensure the element has the CSS class name that matches the stylesheet
     qrContainer.classList.add("qrContainer");
 
-    // simple URL regex (requires http/https). If you want to accept domain-only, adjust the pattern.
     const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
 
     button.addEventListener("click", () => {
       const url = input.value.trim();
 
-      // clear previous note and QR
       noteEl.style.display = "none";
       noteEl.textContent = "";
       qrContainer.innerHTML = "";
@@ -132,13 +129,11 @@
         return;
       }
 
-      // If it doesn't match the URL regex, show the exact requested line
       if (!urlPattern.test(url)) {
-        noteEl.textContent = "i dont think this is a url... but I generated a code anways";
+        noteEl.textContent = "i don't think this is a url... but I generated a code for you anyways ❤️";
         noteEl.style.display = "block";
       }
 
-      // Generate new one
       new QRCode(qrContainer, {
         text: url,
         width: 200,
