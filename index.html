@@ -8,6 +8,11 @@
   <link rel="icon" type="image/x-icon" href="qrIcon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root{
+      --red-500: #D82727;
+      --red-600: #b21f1f;
+    }
+
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: linear-gradient(135deg, #ffb09c, #ee2400);
@@ -16,48 +21,62 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
     h1 {
       color: white;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      font-size: clamp(1.1rem, 4vw, 1.5rem);
+      text-align: center;
     }
 
     .container {
       background: white;
-      padding: 30px 40px;
+      padding: 28px;
       border-radius: 16px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
       text-align: center;
-      width: 320px;
+      width: min(420px, 92vw);
+      box-sizing: border-box;
     }
 
     .qrContainer {
-        margin-top: 20px;
-        display: flex;
-        justify-content: center;
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
     }
 
     input {
       width: 100%;
       padding: 10px 14px;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       font-size: 16px;
       border-radius: 8px;
       border: 1px solid #ccc;
       outline: none;
       transition: border 0.2s;
+      box-sizing: border-box;
     }
 
     input:focus {
-      border-color: #D82727;
+      border-color: var(--red-500);
+    }
+
+    .actions {
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
     }
 
     .btn {
-      background-color: #D82727;
+      background-color: var(--red-500);
       color: white;
       border: none;
       border-radius: 8px;
@@ -67,27 +86,49 @@
       transition: background 0.2s;
       text-decoration: none;
       display: inline-block;
-      margin-right: 8px;
+      margin: 0;
+      min-width: 120px;
+      flex: 1 1 auto;
+      text-align:center;
     }
 
     .btn:hover {
-      background-color: #b21f1f;
+      background-color: var(--red-600);
     }
 
     #qrcode {
-      margin-top: 20px;
+      margin-top: 12px;
+      /* ensure generated image/canvas scales down on narrow screens */
+      max-width: 100%;
+      height: auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* make QR image/canvas responsive */
+    #qrcode img, #qrcode canvas {
+      width: auto;
+      height: auto;
+      max-width: 100%;
     }
 
     .note {
       margin-top: 10px;
-      color: #b21f1f;
+      color: var(--red-600);
       font-size: 13px;
     }
 
     footer {
-      margin-top: 25px;
+      margin-top: 18px;
       color: rgba(255,255,255,0.8);
       font-size: 14px;
+      text-align:center;
+    }
+
+    @media (max-width:380px){
+      .btn { min-width: 0; width: 100%; }
+      .container { padding: 18px; }
+      .note { font-size: 12px; }
     }
   </style>
 </head>
@@ -95,7 +136,7 @@
   <h1>QR Code Generator</h1>
   <div class="container">
     <input type="text" id="urlInput" placeholder="Enter a URL..." />
-    <div style="display:flex; justify-content:center; gap:8px; align-items:center;">
+    <div class="actions">
       <button id="generateBtn" class="btn">Generate QR Code</button>
       <a id="downloadBtn" class="btn" style="display:none" download="qrcode.png">Download QR Code</a>
     </div>
@@ -111,13 +152,19 @@
     const qrContainer = document.getElementById("qrcode");
     const noteEl = document.getElementById("note");
 
-    qrContainer.classList.add("qrContainer");
-
+    // simple URL regex (requires http/https). adjust if you want looser matching
     const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
+
+    function computeQrSize(){
+      // use a responsive size based on viewport, clamped to reasonable bounds
+      const vw = Math.min(window.innerWidth, 420);
+      return Math.max(120, Math.min(300, Math.floor(vw * 0.55)));
+    }
 
     button.addEventListener("click", () => {
       const url = input.value.trim();
 
+      // clear previous note and QR
       noteEl.style.display = "none";
       noteEl.textContent = "";
       qrContainer.innerHTML = "";
@@ -134,10 +181,13 @@
         noteEl.style.display = "block";
       }
 
+      const size = computeQrSize();
+
+      // Generate new one
       new QRCode(qrContainer, {
         text: url,
-        width: 200,
-        height: 200,
+        width: size,
+        height: size,
         colorDark: "#000",
         colorLight: "#fff",
         correctLevel: QRCode.CorrectLevel.H
@@ -157,15 +207,15 @@
             downloadBtn.href = dataUrl;
             downloadBtn.style.display = "inline-block";
           } catch (e) {
-            // fallback: do nothing (download remains hidden)
             console.error("Could not create data URL from canvas:", e);
           }
-        } else {
-          // If the library produced a table or other markup, try to serialize and convert to canvas
-          // (basic fallback): create SVG wrapper from the element's outerHTML and draw it on canvas is complex;
-          // for now leave download hidden.
         }
       }, 50);
+    });
+
+    // optional: update QR size if user regenerates after rotating device
+    window.addEventListener('resize', () => {
+      // nothing automatic, but keep computeQrSize ready when generating again
     });
   </script>
 </body>
