@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, #74ABE2, #5563DE);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      color: white;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      text-align: center;
+      width: 320px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input:focus {
+      border-color: #5563DE;
+    }
+
+    button {
+      background-color: #5563DE;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #4350b5;
+    }
+
+    #qrcode {
+      margin-top: 20px;
+    }
+
+    footer {
+      margin-top: 25px;
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>QR Code Generator</h1>
+  <div class="container">
+    <input type="text" id="urlInput" placeholder="Enter a URL..." />
+    <button id="generateBtn">Generate QR Code</button>
+    <div id="qrcode"></div>
+  </div>
+  <footer>Made with ❤️ by You</footer>
+
+  <script>
+    const input = document.getElementById("urlInput");
+    const button = document.getElementById("generateBtn");
+    const qrContainer = document.getElementById("qrcode");
+
+    button.addEventListener("click", () => {
+      const url = input.value.trim();
+
+      if (!url) {
+        alert("Please enter a valid URL.");
+        return;
+      }
+
+      // Clear previous QR code
+      qrContainer.innerHTML = "";
+
+      // Generate new one
+      new QRCode(qrContainer, {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: "#000",
+        colorLight: "#fff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    });
+  </script>
+</body>
+</html>
