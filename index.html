@@ -56,7 +56,7 @@
       border-color: #D82727;
     }
 
-    button {
+    .btn {
       background-color: #D82727;
       color: white;
       border: none;
@@ -65,14 +65,23 @@
       cursor: pointer;
       font-size: 16px;
       transition: background 0.2s;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 8px;
     }
 
-    button:hover {
+    .btn:hover {
       background-color: #b21f1f;
     }
 
     #qrcode {
       margin-top: 20px;
+    }
+
+    .note {
+      margin-top: 10px;
+      color: #b21f1f;
+      font-size: 13px;
     }
 
     footer {
@@ -86,27 +95,48 @@
   <h1>QR Code Generator</h1>
   <div class="container">
     <input type="text" id="urlInput" placeholder="Enter a URL..." />
-    <button id="generateBtn">Generate QR Code</button>
+    <div style="display:flex; justify-content:center; gap:8px; align-items:center;">
+      <button id="generateBtn" class="btn">Generate QR Code</button>
+      <a id="downloadBtn" class="btn" style="display:none" download="qrcode.png">Download QR Code</a>
+    </div>
     <div id="qrcode" class="qrContainer"></div>
+    <div id="note" class="note" style="display:none"></div>
   </div>
   <footer>Free to use QR Code generator. No sign-up required.</footer>
 
   <script>
     const input = document.getElementById("urlInput");
     const button = document.getElementById("generateBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
     const qrContainer = document.getElementById("qrcode");
+    const noteEl = document.getElementById("note");
 
+    // ensure the element has the CSS class name that matches the stylesheet
     qrContainer.classList.add("qrContainer");
+
+    // simple URL regex (requires http/https). If you want to accept domain-only, adjust the pattern.
+    const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
 
     button.addEventListener("click", () => {
       const url = input.value.trim();
+
+      // clear previous note and QR
+      noteEl.style.display = "none";
+      noteEl.textContent = "";
+      qrContainer.innerHTML = "";
+      downloadBtn.style.display = "none";
+      downloadBtn.removeAttribute('href');
 
       if (!url) {
         alert("Please enter a valid URL.");
         return;
       }
 
-      qrContainer.innerHTML = "";
+      // If it doesn't match the URL regex, show the exact requested line
+      if (!urlPattern.test(url)) {
+        noteEl.textContent = "i dont think this is a url... but I generated a code anways";
+        noteEl.style.display = "block";
+      }
 
       // Generate new one
       new QRCode(qrContainer, {
@@ -117,6 +147,30 @@
         colorLight: "#fff",
         correctLevel: QRCode.CorrectLevel.H
       });
+
+      // Wait a tick for the library to insert the image/canvas, then get a data URL for download.
+      setTimeout(() => {
+        const img = qrContainer.querySelector('img');
+        const canvas = qrContainer.querySelector('canvas');
+
+        if (img && img.src) {
+          downloadBtn.href = img.src;
+          downloadBtn.style.display = "inline-block";
+        } else if (canvas) {
+          try {
+            const dataUrl = canvas.toDataURL("image/png");
+            downloadBtn.href = dataUrl;
+            downloadBtn.style.display = "inline-block";
+          } catch (e) {
+            // fallback: do nothing (download remains hidden)
+            console.error("Could not create data URL from canvas:", e);
+          }
+        } else {
+          // If the library produced a table or other markup, try to serialize and convert to canvas
+          // (basic fallback): create SVG wrapper from the element's outerHTML and draw it on canvas is complex;
+          // for now leave download hidden.
+        }
+      }, 50);
     });
   </script>
 </body>
