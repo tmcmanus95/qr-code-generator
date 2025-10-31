@@ -8,7 +8,8 @@
   <style>
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(135deg, #74ABE2, #5563DE);
+-     background: linear-gradient(135deg, #74ABE2, #5563DE);
++     background: linear-gradient(135deg, #FF7A7A, #D82727);
       color: #333;
       display: flex;
       flex-direction: column;
@@ -31,6 +32,12 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
       text-align: center;
       width: 320px;
+    }
+
+    .qrContainer {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
     }
 
     input {
@@ -81,12 +88,13 @@
     <button id="generateBtn">Generate QR Code</button>
     <div id="qrcode"></div>
   </div>
-  <footer>Made with ❤️ by You</footer>
+  <footer>Free to use QR Code generator. No sign-up required</footer>
 
   <script>
     const input = document.getElementById("urlInput");
     const button = document.getElementById("generateBtn");
     const qrContainer = document.getElementById("qrcode");
+    qrContainer.classList.add("qrcode");
 
     button.addEventListener("click", () => {
       const url = input.value.trim();
