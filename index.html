@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QR Code Generator</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <!-- Optional: load Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', system-ui, sans-serif;
-+     background: linear-gradient(135deg, #FF7A7A, #D82727);
+      background: linear-gradient(135deg, #ffb09c, #ee2400);
       color: #333;
       display: flex;
       flex-direction: column;
@@ -51,11 +53,11 @@
     }
 
     input:focus {
-+     border-color: #D82727;
+      border-color: #D82727;
     }
 
     button {
-+     background-color: #D82727;
+      background-color: #D82727;
       color: white;
       border: none;
       border-radius: 8px;
@@ -66,7 +68,7 @@
     }
 
     button:hover {
-+     background-color: #b21f1f;
+      background-color: #b21f1f;
     }
 
     #qrcode {
@@ -85,7 +87,7 @@
   <div class="container">
     <input type="text" id="urlInput" placeholder="Enter a URL..." />
     <button id="generateBtn">Generate QR Code</button>
-    <div id="qrcode"></div>
+    <div id="qrcode" class="qrContainer"></div>
   </div>
   <footer>Free to use QR Code generator. No sign-up required</footer>
 
@@ -93,7 +95,9 @@
     const input = document.getElementById("urlInput");
     const button = document.getElementById("generateBtn");
     const qrContainer = document.getElementById("qrcode");
-    qrContainer.classList.add("qrcode");
+
+    // ensure the element has the CSS class name that matches the stylesheet
+    qrContainer.classList.add("qrContainer");
 
     button.addEventListener("click", () => {
       const url = input.value.trim();
