@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QR Code Generator</title>
+  <title>QR Code Generator with Logo</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <link rel="icon" type="image/x-icon" href="qrIcon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -51,7 +51,7 @@
       justify-content: center;
     }
 
-    input {
+    input, .file-input {
       width: 100%;
       padding: 10px 14px;
       margin-bottom: 12px;
@@ -63,7 +63,7 @@
       box-sizing: border-box;
     }
 
-    input:focus {
+    input:focus, .file-input:focus {
       border-color: var(--red-500);
     }
 
@@ -98,14 +98,12 @@
 
     #qrcode {
       margin-top: 12px;
-      /* ensure generated image/canvas scales down on narrow screens */
       max-width: 100%;
       height: auto;
       display: flex;
       justify-content: center;
     }
 
-    /* make QR image/canvas responsive */
     #qrcode img, #qrcode canvas {
       width: auto;
       height: auto;
@@ -133,9 +131,10 @@
   </style>
 </head>
 <body>
-  <h1>QR Code Generator</h1>
+  <h1>QR Code Generator with Logo</h1>
   <div class="container">
     <input type="text" id="urlInput" placeholder="Enter a URL..." />
+    <input type="file" id="logoInput" class="file-input" accept="image/png, image/jpeg" />
     <div class="actions">
       <button id="generateBtn" class="btn">Generate QR Code</button>
       <a id="downloadBtn" class="btn" style="display:none" download="qrcode.png">Download QR Code</a>
@@ -147,24 +146,23 @@
 
   <script>
     const input = document.getElementById("urlInput");
+    const logoInput = document.getElementById("logoInput");
     const button = document.getElementById("generateBtn");
     const downloadBtn = document.getElementById("downloadBtn");
     const qrContainer = document.getElementById("qrcode");
     const noteEl = document.getElementById("note");
 
-    // simple URL regex (requires http/https). adjust if you want looser matching
     const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
 
     function computeQrSize(){
-      // use a responsive size based on viewport, clamped to reasonable bounds
       const vw = Math.min(window.innerWidth, 420);
       return Math.max(120, Math.min(300, Math.floor(vw * 0.55)));
     }
 
     button.addEventListener("click", () => {
       const url = input.value.trim();
+      const logoFile = logoInput.files[0];
 
-      // clear previous note and QR
       noteEl.style.display = "none";
       noteEl.textContent = "";
       qrContainer.innerHTML = "";
@@ -183,7 +181,7 @@
 
       const size = computeQrSize();
 
-      // Generate new one
+      // Generate QR Code
       new QRCode(qrContainer, {
         text: url,
         width: size,
@@ -193,29 +191,30 @@
         correctLevel: QRCode.CorrectLevel.H
       });
 
-      // Wait a tick for the library to insert the image/canvas, then get a data URL for download.
       setTimeout(() => {
-        const img = qrContainer.querySelector('img');
         const canvas = qrContainer.querySelector('canvas');
+        if (!canvas) return;
 
-        if (img && img.src) {
-          downloadBtn.href = img.src;
-          downloadBtn.style.display = "inline-block";
-        } else if (canvas) {
-          try {
-            const dataUrl = canvas.toDataURL("image/png");
-            downloadBtn.href = dataUrl;
+        const ctx = canvas.getContext('2d');
+
+        if (logoFile) {
+          const logo = new Image();
+          logo.onload = () => {
+            const logoSize = size * 0.2;
+            const x = (canvas.width - logoSize) / 2;
+            const y = (canvas.height - logoSize) / 2;
+            ctx.drawImage(logo, x, y, logoSize, logoSize);
+
+            downloadBtn.href = canvas.toDataURL("image/png");
             downloadBtn.style.display = "inline-block";
-          } catch (e) {
-            console.error("Could not create data URL from canvas:", e);
-          }
+          };
+          logo.src = URL.createObjectURL(logoFile);
+        } else {
+          // No logo, just QR
+          downloadBtn.href = canvas.toDataURL("image/png");
+          downloadBtn.style.display = "inline-block";
         }
       }, 50);
-    });
-
-    // optional: update QR size if user regenerates after rotating device
-    window.addEventListener('resize', () => {
-      // nothing automatic, but keep computeQrSize ready when generating again
     });
   </script>
 </body>
